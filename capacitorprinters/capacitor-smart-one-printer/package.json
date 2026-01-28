@@ -1,0 +1,21 @@
+{
+  "name": "@zpos/capacitor-smart-one-printer",
+  "version": "0.1.0",
+  "description": "Capacitor plugin for Smart One printer (migrated from smart-one-printer Cordova plugin)",
+  "main": "dist/plugin.cjs.js",
+  "module": "dist/plugin.esm.js",
+  "types": "dist/definitions.d.ts",
+  "author": "ZPOS",
+  "license": "MIT",
+  "keywords": ["capacitor", "printer", "smart-one", "escpos"],
+  "scripts": {
+    "build": "tsc -p tsconfig.json"
+  },
+  "peerDependencies": {
+    "@capacitor/core": "^6.0.0"
+  },
+  "devDependencies": {
+    "@capacitor/core": "^6.0.0",
+    "typescript": "^5.5.0"
+  }
+}

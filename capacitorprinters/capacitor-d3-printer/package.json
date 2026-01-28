@@ -1,0 +1,21 @@
+{
+  "name": "@zpos/capacitor-d3-printer",
+  "version": "0.1.0",
+  "description": "Capacitor plugin for D3 printer (migrated from D3Printer Cordova plugin)",
+  "main": "dist/plugin.cjs.js",
+  "module": "dist/plugin.esm.js",
+  "types": "dist/definitions.d.ts",
+  "author": "ZPOS",
+  "license": "MIT",
+  "keywords": ["capacitor", "printer", "d3", "escpos"],
+  "scripts": {
+    "build": "tsc -p tsconfig.json"
+  },
+  "peerDependencies": {
+    "@capacitor/core": "^6.0.0"
+  },
+  "devDependencies": {
+    "@capacitor/core": "^6.0.0",
+    "typescript": "^5.5.0"
+  }
+}

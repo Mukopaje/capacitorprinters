@@ -1,0 +1,26 @@
+{
+  "name": "@zpos/capacitor-l156-printer",
+  "version": "0.1.0",
+  "description": "Capacitor plugin for L156 printer (migrated from L156Printer Cordova plugin)",
+  "main": "dist/plugin.cjs.js",
+  "module": "dist/plugin.esm.js",
+  "types": "dist/definitions.d.ts",
+  "author": "ZPOS",
+  "license": "MIT",
+  "keywords": ["capacitor", "printer", "l156", "escpos"],
+  "scripts": {
+    "build": "tsc -p tsconfig.json"
+  },
+  "capacitor": {
+    "android": {
+      "src": "android"
+    }
+  },
+  "peerDependencies": {
+    "@capacitor/core": "^6.0.0"
+  },
+  "devDependencies": {
+    "@capacitor/core": "^6.0.0",
+    "typescript": "^5.5.0"
+  }
+}

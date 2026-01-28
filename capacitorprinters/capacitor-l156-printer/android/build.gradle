@@ -1,0 +1,30 @@
+apply plugin: 'com.android.library'
+
+android {
+    namespace 'cordova.plugin.l156printer'
+    compileSdkVersion rootProject.ext.compileSdkVersion ?: 34
+
+    defaultConfig {
+        minSdkVersion rootProject.ext.minSdkVersion ?: 21
+        targetSdkVersion rootProject.ext.targetSdkVersion ?: 34
+    }
+
+    sourceSets {
+        main {
+            java.srcDir 'src/main/java'
+            aidl.srcDir 'src/main/aidl'
+            manifest.srcFile 'src/main/AndroidManifest.xml'
+            res.srcDir 'src/main/res'
+            assets.srcDir 'src/main/assets'
+        }
+    }
+}
+
+dependencies {
+    // Depend on Capacitor Android so com.getcapacitor.* is available
+    implementation project(':capacitor-android')
+    // Only load generic JARs from libs; the autoreplyprint AAR is added via autoreplyprint.gradle
+    implementation fileTree(dir: 'libs', include: ['*.jar'])
+}
+
+apply from: 'autoreplyprint.gradle'

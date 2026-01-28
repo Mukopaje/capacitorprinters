@@ -1,0 +1,27 @@
+{
+  "name": "@zpos/capacitor-ocom-q1-printer",
+  "version": "0.1.0",
+  "description": "Capacitor plugin for OCOM Q1 built-in printer (migrated from cordova-plugin-ocom-q1-printer)",
+  "main": "dist/plugin.cjs.js",
+  "module": "dist/plugin.esm.js",
+  "types": "dist/definitions.d.ts",
+  "author": "ZPOS",
+  "license": "MIT",
+  "keywords": [
+    "capacitor",
+    "printer",
+    "ocom",
+    "q1",
+    "escpos"
+  ],
+  "scripts": {
+    "build": "tsc -p tsconfig.json"
+  },
+  "peerDependencies": {
+    "@capacitor/core": "^6.0.0"
+  },
+  "devDependencies": {
+    "@capacitor/core": "^6.0.0",
+    "typescript": "^5.5.0"
+  }
+}
