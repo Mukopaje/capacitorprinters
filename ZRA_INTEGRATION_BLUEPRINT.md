@@ -1537,3 +1537,72 @@ All endpoints require JWT authentication. `tenantId` is extracted from the JWT t
 17. **VSDC runs locally** — The VSDC is a Java/Tomcat WAR file installed on the local machine, not a remote cloud API. There is no separate production URL — production vs sandbox depends on which WAR installer ZRA provides.
 
 18. **Retry queue replay** — Store the full `vsdc_request` JSON on first attempt. Replay this exact request on retry rather than rebuilding, to avoid invoice counter drift.
+
+19. **Tax scheme is auto-detected, not manually configured** — `tax_scheme` is set from `cdCls=400` during TPIN validation. Never expose it as a user-editable field.
+
+20. **TOT businesses must NOT use `vatCatCd: 'A'`** — For TOT, all items use `vatCatCd: 'TOT'`, `vatAmt: 0`, `vatTaxblAmt = splyAmt`, and `taxblAmtTot = totAmt` at the header level.
+
+---
+
+## 18. VAT vs Turnover Tax (TOT)
+
+### Background
+
+Zambian businesses registered with ZRA fall into one of two tax regimes:
+
+| Regime | Who | Rate | Frequency | VSDC item vatCatCd |
+|--------|-----|------|-----------|-------------------|
+| **VAT** | Standard, revenue > ZMW 800k/yr | 16% per sale | Monthly returns | `A` (or B/C1-C3/D/E) |
+| **TOT** | Small businesses, revenue ≤ ZMW 800k/yr | 4% of gross turnover | Quarterly returns | `TOT` |
+
+### Auto-Detection via `selectCodes` (cdCls=400)
+
+`/code/selectCodes` returns **business-specific** taxation types under `cdCls=400` (not global reference codes). The `dtlList` contains only the tax categories applicable to that TPIN.
+
+```typescript
+// Detection logic (VsdcApiService.detectTaxScheme)
+const businessTaxClass = clsList.find(c => c.cdCls === '400');
+const codes = businessTaxClass?.dtlList?.map(d => d.cd) ?? [];
+const hasVat = codes.some(cd => ['A', 'B', 'C1', 'C2', 'C3'].includes(cd));
+const hasTot = codes.some(cd => cd === 'TOT');
+const taxScheme = hasTot && !hasVat ? 'TOT' : 'VAT';
+```
+
+Example response for a VAT business:
+```json
+{ "cdCls": "400", "dtlList": [{"cd": "A"}, {"cd": "B"}, {"cd": "C3"}] }
+```
+
+Example response for a TOT business:
+```json
+{ "cdCls": "400", "dtlList": [{"cd": "TOT"}] }
+```
+
+### How `tax_scheme` Flows Through the System
+
+1. **TPIN Validation** (`validateTpin`) → detects scheme from `cdCls=400` → includes `taxScheme` in `TpinValidationResponse`
+2. **Config persistence** (`createConfigFromValidation`) → stores `tax_scheme` on `zra_configurations`
+3. **Status endpoint** (`getZraStatus`) → exposes `taxScheme` in the `/zra/status` response
+4. **Fiscalization** (`buildVsdcRequest`) → passes `taxScheme` to VSDC request builder
+5. **Frontend cart** → `CartService` applies `ZraIntegrationService.isTotBusiness()` to disable per-item VAT for TOT
+6. **Frontend receipt** → hides VAT line for TOT; shows "Turnover Tax (TOT)" note
+7. **Reports** → tax summary uses `getTaxSummaryMode()` to show either VAT collected (16%) or TOT quarterly estimate (4%)
+
+### VSDC Submission Differences
+
+| Field | VAT business | TOT business |
+|-------|-------------|-------------|
+| `vatCatCd` (item) | `'A'` (or B/C etc.) | `'TOT'` |
+| `vatTaxblAmt` (item) | `splyAmt / 1.16` | `splyAmt` (full gross) |
+| `vatAmt` (item) | `splyAmt - vatTaxblAmt` | `0` |
+| `taxblAmtA` (header) | `Σ item vatTaxblAmt` | `0` |
+| `taxblAmtTot` (header) | `0` | `Σ item splyAmt` |
+| `taxAmtTot` (header) | `0` | `0` (TOT not per-invoice) |
+| `taxRtA` | `16` | `0` |
+| `taxRtTot` | `0` | `4` (declared for reference only) |
+
+### Important Notes
+
+- **TOT is NOT a per-invoice tax.** `taxAmtTot` is always `0` on individual invoices. The 4% is assessed by ZRA quarterly based on total turnover declared via the ZRA portal.
+- **The VSDC still requires fiscalization** even for TOT businesses — invoices must be signed, but the VAT fields are all zeroed out.
+- **Settings page shows ZRA-managed tax as read-only** when `status.enabled` is true. The UI prevents manual override.
