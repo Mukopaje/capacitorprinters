@@ -162,12 +162,15 @@ Each phase ships independently with roadmap + KB (per policy), on branches/PRs g
 - **Cold deals surface themselves**; Xana offers re-engagement drafts.
 - **Reports** on pipeline value, conversion, velocity, win/loss, and which sources actually convert.
 
-## 9. Open decisions for the owner
+## 9. Decisions (CONFIRMED by owner, 2026-07-15)
 
-- **Scope first:** platform sales CRM (UZARA selling to merchants) — confirmed primary. A
-  tenant-facing CRM (merchants managing THEIR customers) is a separate later track — in scope or not?
-- **Inbound email:** provider for inbound routing (Mailgun/SES inbound, or IMAP on a shared
-  mailbox)? Determines the reply-to domain setup.
-- **Calendar:** Google first (confirmed); Outlook later?
-- **Interface depth for v1:** ship the pipeline + deal-detail + Xana assist first, or wait for
-  email two-way to land together?
+- **Scope:** v1 = PLATFORM sales CRM (UZARA selling to merchants), super-admin/sales-staff only.
+- **Tenant-facing CRM = a LATER PAID ADDON** (merchants managing THEIR customers on the same
+  foundation). This is a standing design constraint for v1: keep the schema/service **tenant-aware**
+  from day one (a scope discriminator — platform rows vs tenant_id rows), keep the UI components
+  reusable, and register the future `crm` addon key when we get there. Nothing in v1 may assume
+  platform-only in a way that blocks the addon.
+- **Build order:** owner accepted recommendation — Phase 1 (Foundation) + Phase 2 (Xana assist)
+  first, then email two-way, then scheduling, automation, reporting.
+- **Calendar:** Google first. **Channels:** email live now; WhatsApp built-ready, switched on later.
+- **Inbound email provider:** still to pick when Phase 3 starts (Mailgun/SES inbound vs IMAP).
